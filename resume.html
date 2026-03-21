@@ -1,0 +1,40 @@
+<body>
+  <div class="resume">
+    <div class="personalInfo">
+      <div class="personalData">
+        <h2 class="resumename"></h2>
+        <h5>Email: <span class="resumeemail"></span></h5>
+        <h5>Phone: <span class="resumephone"></span></h5>
+        <h5>DOB: <span class="resumeDob"></span></h5>
+        <h5>Gender: <span class="resumegender"></span></h5>
+      </div>
+      <img src="" />
+    </div>
+
+    <div class="skills">
+      <h2>Skills</h2>
+      <div class="allskills"></div>
+    </div>
+  </div>
+
+  <script>
+    const data = JSON.parse(localStorage.getItem("formData"));
+
+    document.querySelector(".resumename").textContent = data.name;
+    document.querySelector(".resumeemail").textContent = data.email;
+    document.querySelector(".resumephone").textContent = data.phonenumber;
+    document.querySelector(".resumeDob").textContent = data.date;
+    document.querySelector(".resumegender").textContent = data.gender;
+
+    const img = localStorage.getItem("profileImage");
+    if (img) document.querySelector("img").src = img;
+
+    const skillsBox = document.querySelector(".allskills");
+
+    document.querySelectorAll(".selectedSkilles .skill").forEach((s) => {
+      const p = document.createElement("p");
+      p.textContent = s.dataset.value;
+      skillsBox.appendChild(p);
+    });
+  </script>
+</body>

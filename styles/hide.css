@@ -1,0 +1,9 @@
+.hide {
+  display: none;
+}
+
+.disable:disabled {
+  cursor: none;
+  cursor: not-allowed;
+  opacity: 0.5;
+}

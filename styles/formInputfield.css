@@ -1,0 +1,165 @@
+.innerDataInputs {
+  border: 1px solid black;
+  border-radius: 5px;
+  width: 100%;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 45%;
+}
+
+.inputGrouptextarea {
+  display: flex;
+  width: 95%;
+  gap: 10px;
+}
+
+.inputGrouptextarea i {
+  font-size: 20px;
+  margin-right: 5px;
+}
+
+.inputGrouptextarea textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical; /* user can resize only up-down */
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.dropdownInner {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+}
+
+.dropdownInner i {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.dropdownInner select {
+  outline: none;
+  padding: 1rem;
+  border-radius: 5px;
+  font-size: 18px;
+  width: 95%;
+}
+
+.inputGroup input,
+.inputGroup select {
+  outline: none;
+  padding: 1rem;
+  border-radius: 5px;
+  font-size: 18px;
+  width: 95%;
+}
+
+input[type="date"] {
+  width: 70%;
+}
+
+input[type="file"] {
+  width: 95%;
+  box-sizing: border-box;
+}
+
+.inputGroup input:focus {
+  border: 2px solid rgb(137, 137, 196);
+}
+
+.inputGroup i {
+  font-size: 20px;
+  margin-right: 5px;
+}
+
+.typeOfInformation {
+  border-bottom: 2px solid rgb(215, 209, 209);
+}
+
+.inputContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.addEducation button {
+  width: fit-content;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  background-color: blue;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.addEducation button:hover {
+  transform: scale(1.1);
+}
+
+.eduHash {
+  width: 100%;
+  color: blue;
+}
+
+.selectedSkilles {
+  width: 100%;
+  padding: 10px 20px;
+  border: 2px solid rgb(204, 204, 217);
+}
+
+.selectedSkilles span {
+  color: rgb(129, 124, 124);
+  padding: 0px 5px;
+  border-radius: 5px;
+  border: 1px solid rgb(123, 119, 119);
+}
+
+.selectedSkilles span i {
+  color: red;
+  cursor: pointer;
+}
+
+.dropdownbox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+@media (max-width: 410px) {
+  .formStep {
+    width: 90%;
+  }
+
+  .dataContent {
+    width: 100%;
+    justify-content: left;
+    padding: 0px;
+  }
+  .inputGroup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+
+  input[type="date"] {
+    width: 60%;
+  }
+}
