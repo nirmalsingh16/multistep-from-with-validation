@@ -12,27 +12,31 @@ function showPage(index) {
   pages[index].classList.remove("hide");
 }
 
-//  ERROR
+// ERROR
 function showError(input, message) {
-  const parent = input.closest(".inputGroup") || input.parentElement;
-
+  const parent =
+    input.closest(".inputGroup") ||
+    input.closest(".inputGrouptextarea") ||
+    input.parentElement;
   let err = parent.querySelector(".error");
   if (!err) {
     err = document.createElement("small");
     err.classList.add("error");
     parent.appendChild(err);
   }
-
   err.textContent = message;
 }
 
 function clearError(input) {
-  const parent = input.closest(".inputGroup") || input.parentElement;
+  const parent =
+    input.closest(".inputGroup") ||
+    input.closest(".inputGrouptextarea") ||
+    input.parentElement;
   const err = parent.querySelector(".error");
   if (err) err.remove();
 }
 
-//  VALIDATION
+// VALIDATION
 function validatePage() {
   let valid = true;
 
@@ -41,6 +45,14 @@ function validatePage() {
   inputs.forEach((input) => {
     clearError(input);
     const value = input.value.trim();
+
+    if (input.type === "file") {
+      if (input.hasAttribute("required") && input.files.length === 0) {
+        showError(input, "Please upload an image");
+        valid = false;
+      }
+      return;
+    }
 
     if (input.hasAttribute("required") && value === "") {
       showError(input, "This field is required");
@@ -59,13 +71,12 @@ function validatePage() {
     }
   });
 
-  //  SKILLS VALIDATION
+  // SKILLS VALIDATION
   if (currentPage === 2) {
     const skillBoxes = document.querySelectorAll(".dropdownbox");
 
     skillBoxes.forEach((box) => {
       const skills = box.querySelectorAll(".skill");
-
       let err = box.querySelector(".error");
 
       if (skills.length === 0) {
@@ -83,7 +94,6 @@ function validatePage() {
 
     const cert = document.querySelector("textarea[name='certification']");
     clearError(cert);
-
     if (!cert.value.trim()) {
       showError(cert, "This field is required");
       valid = false;
@@ -93,32 +103,41 @@ function validatePage() {
   return valid;
 }
 
-//  NEXT
+// NEXT
 nextBtn.addEventListener("click", () => {
-  // FINAL SUBMIT
-  // if (currentPage === pages.length - 1) {
-  //   saveDataWithImage(() => {
-  //     window.location.href = "resume.html";
-  //   });
-  //   return;
-  // }
-
   if (!validatePage()) return;
 
-  icons[currentPage].classList.add("active");
+  // On last real step (page 2 = skills), save then show resume
+  if (currentPage === pages.length - 2) {
+    saveDataWithImage(() => {
+      icons[currentPage].classList.add("active");
+      currentPage++;
+      showPage(currentPage);
+      backBtn.disabled = false;
+      nextBtn.textContent = "Submit";
+      fillResume();
+    });
+    return;
+  }
 
+  // Final submit
+  if (currentPage === pages.length - 1) {
+    alert("Resume submitted successfully!");
+    return;
+  }
+
+  icons[currentPage].classList.add("active");
   currentPage++;
   showPage(currentPage);
-
   backBtn.disabled = false;
 
   if (currentPage === pages.length - 1) {
     nextBtn.textContent = "Submit";
-    fillResume(); // preview
+    fillResume();
   }
 });
 
-//  BACK
+// BACK
 backBtn.addEventListener("click", () => {
   if (currentPage > 0) {
     currentPage--;
@@ -131,7 +150,7 @@ backBtn.addEventListener("click", () => {
   nextBtn.textContent = "Next";
 });
 
-//  SKILLS SELECTION
+// SKILLS SELECTION
 document.querySelectorAll(".dropdownbox select").forEach((select) => {
   select.addEventListener("change", function () {
     const value = this.value;
@@ -140,7 +159,6 @@ document.querySelectorAll(".dropdownbox select").forEach((select) => {
     const box = this.closest(".dropdownbox");
     const display = box.querySelector(".selectedSkilles");
 
-    // prevent duplicate
     const exists = [...display.querySelectorAll(".skill")].some(
       (el) => el.dataset.value === value,
     );
@@ -152,58 +170,67 @@ document.querySelectorAll(".dropdownbox select").forEach((select) => {
     const span = document.createElement("span");
     span.classList.add("skill");
     span.dataset.value = value;
-
     span.innerHTML = `${value} <i style="cursor:pointer;">✖</i>`;
-
     span.querySelector("i").onclick = () => span.remove();
-
     display.appendChild(span);
-
     this.value = "";
   });
 });
 
-// ================= SAVE DATA =================
+// SAVE DATA
 function saveDataWithImage(callback) {
   const data = {};
   const inputs = document.querySelectorAll("input, select, textarea");
-
   let fileInput = null;
 
   inputs.forEach((input) => {
     if (input.type === "file") {
       fileInput = input;
-    } else {
+    } else if (input.name) {
       data[input.name] = input.value;
     }
   });
 
-  // skills
+  // Education: collect all education blocks
+  const educationBlocks = document.querySelectorAll(".inputContainer");
+  const educations = [];
+  educationBlocks.forEach((block) => {
+    const degree = block.querySelector("[name^='degree']");
+    const institute = block.querySelector("[name^='institutename']");
+    const year = block.querySelector("[name^='passingyear']");
+    const grade = block.querySelector("[name^='grade']");
+    if (degree && institute && year && grade) {
+      educations.push({
+        degree: degree.value,
+        institute: institute.value,
+        year: year.value,
+        grade: grade.value,
+      });
+    }
+  });
+  data.educations = educations;
+
+  // Skills
   const techSkills = [];
   const otherSkills = [];
-
   document.querySelectorAll(".dropdownbox").forEach((box, index) => {
     const skills = [...box.querySelectorAll(".skill")].map(
       (el) => el.dataset.value,
     );
-
     if (index === 0) techSkills.push(...skills);
     else otherSkills.push(...skills);
   });
-
   data.techSkills = techSkills;
   data.otherSkills = otherSkills;
 
-  // image
+  // Image
   if (fileInput && fileInput.files[0]) {
     const reader = new FileReader();
-
     reader.onload = function () {
       data.image = reader.result;
       localStorage.setItem("formData", JSON.stringify(data));
       if (callback) callback();
     };
-
     reader.readAsDataURL(fileInput.files[0]);
   } else {
     localStorage.setItem("formData", JSON.stringify(data));
@@ -211,7 +238,7 @@ function saveDataWithImage(callback) {
   }
 }
 
-// ================= ADD EDUCATION =================
+// ADD EDUCATION
 let eduCount = 1;
 
 document
@@ -224,49 +251,91 @@ document
     div.classList.add("inputContainer");
 
     div.innerHTML = `
-    <h4>#Education ${eduCount}</h4>
-
+    <h4 class="eduHash">#Education ${eduCount}</h4>
     <div class="inputGroup">
-      <input type="text" name="degree${eduCount}" placeholder="Degree" required />
+      <i class="fa-solid fa-user-graduate"></i>
+      <input type="text" name="degree${eduCount}" placeholder="Degree Level" required />
     </div>
-
     <div class="inputGroup">
-      <input type="text" name="institutename${eduCount}" placeholder="Institute" required />
+      <i class="fa-solid fa-building-columns"></i>
+      <input type="text" name="institutename${eduCount}" placeholder="Institute name" required />
     </div>
-
     <div class="inputGroup">
-      <input type="number" name="passingyear${eduCount}" placeholder="Year" required />
+      <i class="fa-solid fa-calendar-days"></i>
+      <input type="number" name="passingyear${eduCount}" placeholder="Passing Year" required />
     </div>
-
     <div class="inputGroup">
-      <input type="text" name="grade${eduCount}" placeholder="Grade" required />
+      <i class="fa-solid fa-c"></i>
+      <input type="text" name="grade${eduCount}" placeholder="Grade/CGPA" required />
     </div>
-
-    <button type="button" class="deleteEdu" style="color:red;">Delete</button>
+    <button type="button" class="deleteEdu" style="color:red; margin: 5px 0 10px;">Delete</button>
   `;
 
     document.querySelector(".addEducation").before(div);
-
     div.querySelector(".deleteEdu").onclick = () => div.remove();
   });
 
-// ================= RESUME PREVIEW =================
+// FILL RESUME (called after saveDataWithImage, so localStorage is ready)
 function fillResume() {
   const data = JSON.parse(localStorage.getItem("formData"));
   if (!data) return;
 
+  // Personal info
   document.querySelector(".resumename").textContent = data.name || "";
   document.querySelector(".resumeemail").textContent = data.email || "";
   document.querySelector(".resumephone").textContent = data.phonenumber || "";
   document.querySelector(".resumeDob").textContent = data.date || "";
   document.querySelector(".resumegender").textContent = data.gender || "";
 
-  // image
+  // Photo
   if (data.image) {
     document.querySelector(".personalInfo img").src = data.image;
   }
 
-  // skills
+  // Education
+  const educationSection = document.querySelector(".education");
+  educationSection.innerHTML = "<h2>Education</h2>";
+
+  if (data.educations && data.educations.length > 0) {
+    data.educations.forEach((edu) => {
+      const div = document.createElement("div");
+      div.classList.add("educationData");
+      div.innerHTML = `
+        <h4 class="courseName">${edu.degree}</h4>
+        <p class="institue">${edu.institute}</p>
+        <div class="yearGrade">
+          <h5>Year: <span>${edu.year}</span></h5>
+          <h5>CGPA: <span>${edu.grade}</span></h5>
+        </div>
+      `;
+      educationSection.appendChild(div);
+    });
+  }
+
+  // Certifications
+  const certSection = document.querySelector(".certificate");
+  certSection.innerHTML = "<h2>Certification</h2>";
+  const certDiv = document.createElement("div");
+
+  const certText = data.certification || "";
+  const certLines = certText
+    .split("\n")
+    .map((c) => c.trim())
+    .filter(Boolean);
+  if (certLines.length > 0) {
+    certLines.forEach((cert) => {
+      const p = document.createElement("p");
+      p.textContent = cert;
+      certDiv.appendChild(p);
+    });
+  } else {
+    const p = document.createElement("p");
+    p.textContent = certText;
+    certDiv.appendChild(p);
+  }
+  certSection.appendChild(certDiv);
+
+  // Skills
   const techBox = document.querySelector(".techskills");
   const otherBox = document.querySelector(".otherskills");
 
